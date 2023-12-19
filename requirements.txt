@@ -1,0 +1,23 @@
+# This file will be changed, to represent actual modules and versions there-of used.
+
+Project: Huffman Coding Compressor and Decompressor
+
+Objective: Develop a Huffman coding tool that reads text from a file, encodes it using Huffman coding, and writes the encoded data to a new file. Decompress the encoded data back to the original text and write the decompressed text to a separate file.
+
+Requirements:
+1.	Read text from a specified file using the 'open' function.
+2.	Implement the Huffman coding algorithm to generate a Huffman code table.
+3.	Create a data structure like a dictionary or hash table to store the Huffman code representations.
+4.	Encode the text using the Huffman code table, replacing each character with its corresponding code.
+5.	Write the encoded text to a new text file.
+6.	Implement the inverse Huffman coding algorithm to decode the encoded text back to the original text.
+7.	Write the decoded text to a separate text file.
+8.	Employ data structures like queues and priority queues to efficiently manage the character frequencies and code generation.
+
+
+1. Group name : A1
+2. Project Title :Huffman Coding
+Further assumptions / requirements must be added by you (team).
+Deadline for complete project (presentation and demo) is in 
+The week starting from 
+16th January 2024.
