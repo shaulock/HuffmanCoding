@@ -1,10 +1,11 @@
 from imports import isfile
 
 # This function will get the file path from user and confirm that the file exists
-# return type : string (or str)
+# return type -> str
 def get_file_path() -> str:
     """
-    Anyone can exit the program if they press ctrl + C, so instead of printing an error message, we will print a custom message
+    Anyone can exit the program if they press ctrl + C, 
+    so instead of printing an error message, we will print a custom message
     """
     try:
 
@@ -24,15 +25,16 @@ def get_file_path() -> str:
         exit(0)
 
 # This function will get the string from file
-# return type : string (or str)
+# return type -> str
 def get_string() -> str:
     # Using the function we made to get the file
-    path = get_file_path()
+    file = get_file_path()
     # using with open, so we don't have to worry about closing the file
-    with open(path, 'r') as file:
+    with open(file, 'r') as f:
         # Returning the string that we read
-        return file.read()
+        return f.read()
 
 # This function will send the string from the file to the caller function
-def read():
+# Return type -> str
+def read() -> str:
     return get_string()
