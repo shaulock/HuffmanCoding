@@ -1,10 +1,29 @@
 from huffman_tree import generate_code_from_queue
-from analyser import analyse_text, SEPARATORS
+from analyser import analyse_text, SEPARATORS, str_rep, is_valid_dict
 from imports import dumps
+from exception_handler import IncorrectBinaryValueException, BinaryStringExpectedException
+from exception_handler import SeparatorSplitExpectedStringExpection, CompressorExpectedStringException
 
 # This function converts binary (in string form) to decimal (only positive)
 # Return type -> int
 def binary_to_decimal(bin: str) -> int:
+
+    # If the value passed is not a string literal, raise proper error
+    if not isinstance(bin, str):
+        raise BinaryStringExpectedException(f"""
+Function Call : binary_to_decimal({bin = })
+Provided Value {bin = } is not a string literal.
+""")
+
+    # Go through the string and see if each character is 0 or 1, if not
+    # Raise proper error
+    for i in bin:
+        if i not in ['1', '0']:
+            raise IncorrectBinaryValueException(f"""
+Function Call : binary_to_decimal({bin = })
+Provided Value {bin = } is incorrect binary string.
+""")
+        
     # Take the characters from right to left
     # multiply it with 2 ^ (position of the character from right - 1) and store it in a list
     # sum all the elements of that list
@@ -15,8 +34,26 @@ def binary_to_decimal(bin: str) -> int:
 # This function will split a string on given separators but also keep the separators in the list
 # So we can separate a string based on separators and then be able to rejoin them to get the original string
 # Return type -> list [ str ]
-def separator_split(s: str, separators: str) -> list[str]:
+def separator_split(s: str, separators: str = ' ') -> list[str]:
     
+    # If the passed string is not a string raise proper error
+    if not isinstance(s, str):
+        raise SeparatorSplitExpectedStringExpection(f"""
+Function Call : separator_split({s = }, {separators = })
+Provided Value {s = } is not a string literal
+""")
+    
+    # If the separators passed is not a string raise proper error
+    if not isinstance(separators, str):
+        raise SeparatorSplitExpectedStringExpection(f"""
+Function Call : separator_split({s=}, {separators=})
+Provided Value {separators=} is not a string literal
+""")
+
+    # If the separators string is empty return a list of each separate character in the string
+    if not separators:
+        return [i for i in s]
+
     # The list of substrings that need to be returned
     substrings = []
     
@@ -78,8 +115,11 @@ def separator_split(s: str, separators: str) -> list[str]:
 
 # This function will create the binary string for a given text based on the huffman code given
 # Return type -> str
-def make_compressed_string(text: str, huffman_codes: dict[str: int], word_list: list[str]) -> str:
-
+def make_compressed_string(text: str, huffman_codes: dict[str: str], word_list: list[str]) -> str:
+    
+    
+    
+    huffman_codes
     # Separating 1s and 0s from other characters
     ones_and_zeros = separator_split(text, '01')
     # Converting the 1s and 0s using our code before converting anything else
@@ -114,6 +154,14 @@ def make_compressed_string(text: str, huffman_codes: dict[str: int], word_list: 
 # To produce the final string that should be written to the output file
 # Return type -> str
 def create_string_to_write(text: str) -> str:
+    
+    # if text is not a string literal raise proper error
+    if not isinstance(text, str):
+        raise CompressorExpectedStringException(f"""
+Function Call : create_string_to_write({text = })
+Provided Value {text = } is not a string literal.
+""")
+
     # Getting the priority queue and word list from the text to be compressed
     queue, words = analyse_text(text)
     # Setting the type of the code, so we are able to call functions from the type class

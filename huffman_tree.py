@@ -86,8 +86,8 @@ def convert_junction_to_tree(node: JunctionNode) -> StrictTreeNode:
     return StrictTreeNode(tuple(children))
 
 # This function will convert a huffman tree into huffman codes dictionary
-# Return type -> dict [ str : int ]
-def get_huffman_codes(node: StrictTreeNode, prev: str='') -> dict:
+# Return type -> dict [ str : str ]
+def get_huffman_codes(node: StrictTreeNode, prev: str='') -> dict [str: str]:
     
     # Create an empty dictionary
     codes = dict()
@@ -108,7 +108,7 @@ def get_huffman_codes(node: StrictTreeNode, prev: str='') -> dict:
 # This function will call necessary functions and convert 
 # a priority queue directly to huffman codes dictionary
 # Return type -> dict [ str : int ]
-def generate_code_from_queue(queue: Priority_Queue) -> dict[str: int]:
+def generate_code_from_queue(queue: Priority_Queue) -> dict[str: str]:
     # Get the junction tree from the queue
     junction_tree = make_junction_tree(queue)
     # Get the huffman tree from the junction tree

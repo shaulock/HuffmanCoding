@@ -109,6 +109,9 @@ def create_string_to_write(text: str) -> str:
     # Returning the final string
     return final_string
 
+
+from printer import print_welcome
+print_welcome()
 TO_CHECK = ''
 with open('requirements.txt', 'r', encoding='utf8') as f:
     TO_CHECK = f.read()
