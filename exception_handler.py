@@ -73,3 +73,23 @@ class CompressorExpectedStringException(CompressorExceptions):
     def __init__(self, *args: object) -> None:
         print_error('Error occurred while calling create_string_to_write() function.')
         super().__init__(*args)
+
+class MakeCompressedStringExpectedStringException(CompressorExceptions):
+    def __init__(self, *args: object) -> None:
+        print_error('Error occurred while calling make_compressed_string() function.')
+        super().__init__(*args)
+
+class MakeCompressedStringExpectedDictException(CompressorExceptions):
+    def __init__(self, *args: object) -> None:
+        print_error('Error occurred while calling make_compressed_string() function.')
+        super().__init__(*args)
+
+class MakeCompressedStringCorruptedCodeException(CompressorExceptions):
+    def __init__(self, *args: object) -> None:
+        print_error('Error occurred while calling make_compressed_string() function.')
+        super().__init__(*args)
+
+class MakeCompressedStringDictStructureException(CompressorExceptions):
+    def __init__(self, *args: object) -> None:
+        print_error('Error occurred while calling make_compressed_string() function.')
+        super().__init__(*args)

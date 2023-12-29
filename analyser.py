@@ -264,8 +264,8 @@ The pair {key = }, {value = } does not meet the requirements (key: str, value: i
     return entity_queue
 
 # This function will call all the functions in this file to analyse the text passed to it
-# Return type -> tuple [ PriorityQueue , list [ str ] ]
-def analyse_text(text: str) -> tuple[Priority_Queue, list[str]]:
+# Return type ->  PriorityQueue
+def analyse_text(text: str) -> Priority_Queue:
     
     # If the text is not a string, raise proper error
     if not isinstance(text, str):
@@ -284,11 +284,9 @@ Provided Value {text = } is not a string literal
     combined = dict()
     combined.update(letters)
     combined.update(words)
-    # Creating the list of keys in the words dictionary
-    words = [word for word in words.keys()]
     # Making the priority queue of the combined dictionary
     queue = make_queue(entity_dict=combined)
     # Now deleting the dictionaries that are not needed to save space
-    del combined, letters
+    del combined, letters, words
     # Returning the queue and word lsit as a tuple
-    return queue, words
+    return queue
