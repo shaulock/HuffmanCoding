@@ -1,14 +1,18 @@
 from printer import print_error, Fore, Style
+
+# This is the mother of all exceptions for this project
 class HuffmanExceptions(Exception):
     def __init__(self, *args: object) -> None:
         print_error(f"Exception Name : {type(self).__name__} - {args[0]}{Style.RESET_ALL}", end=f'\n{Fore.CYAN}')
         super().__init__(*args)
-    
+
+# This is the mother of all exceptions (for the analyser file)
 class AnalyserExceptions(HuffmanExceptions):
     def __init__(self, *args: object) -> None:
         print_error('The function was part of the analyser.py file.')
         super().__init__(*args)
-    
+
+# The following exceptions occur in the analyser file
 class CountLettersExpectedStringException(AnalyserExceptions):
     def __init__(self, *args: object) -> None:
         print_error('Error occurred while calling the count_letters() function.')
@@ -49,11 +53,13 @@ class RefineLettersDictionaryStructureException(AnalyserExceptions):
         print_error('Error occurred while calling the refine_letters() function.')
         super().__init__(*args)
 
+# This is the mother of all exceptions is the compressor file
 class CompressorExceptions(HuffmanExceptions):
     def __init__(self, *args: object) -> None:
         print_error('The Function was part of the compressor.py file.')
         super().__init__(*args)
 
+# The following exceptions occur in the compressor file
 class BinaryStringExpectedException(CompressorExceptions):
     def __init__(self, *args: object) -> None:
         print_error('Error occurred while calling binary_to_decimal() function.')
@@ -89,11 +95,13 @@ class MakeCompressedStringDictStructureException(CompressorExceptions):
         print_error('Error occurred while calling make_compressed_string() function.')
         super().__init__(*args)
 
+# This is the mother of all exceptions in the decompressor file
 class DecompressorExceptions(HuffmanExceptions):
     def __init__(self, *args: object) -> None:
         print_error('The Function was part of the decompressor.py file.')
         super().__init__(*args)
 
+# The following exceptions occur in the decompressor file
 class DecimalToBinaryExpectedIntException(DecompressorExceptions):
     def __init__(self, *args: object) -> None:
         print_error('Error occurred while calling decimal_to_binary() function.')
@@ -144,11 +152,13 @@ class TextCorruptedExpection(DecompressorExceptions):
         print_error(f'Error occurred while calling {function_name} function.')
         super().__init__(*args)
 
+# This is the mother of all exceptions in the huffman_tree file
 class HuffmanTreeExceptions(HuffmanExceptions):
     def __init__(self, *args: object) -> None:
         print_error('The Function was part of the huffman_tree.py file.')
         super().__init__(*args)
 
+# The following exceptions occur in the huffman_tree file
 class GenerateTreeExpectedDictException(HuffmanTreeExceptions):
     def __init__(self, *args: object) -> None:
         print_error('Error occurred while calling generate_tree_from_code() function.')
@@ -194,11 +204,13 @@ class GenerateCodeFromQueueEmptyQueueException(HuffmanTreeExceptions):
         print_error('Error occurred while calling generate_code_from_queue() function.')
         super().__init__(*args)
 
+# This is the mother of all exceptions in the queues file
 class QueuesExceptions(HuffmanExceptions):
     def __init__(self, *args: object) -> None:
         print_error('The Function was part of the queues.py file.')
         super().__init__(*args)
 
+# The following exceptions occur in the queues file
 class NonIntegerQueueSizeException(QueuesExceptions):
     def __init__(self, *args: object) -> None:
         print_error('Error occurred when setting the size of the queue.')
@@ -228,11 +240,13 @@ class EmptyQueueException(QueuesExceptions):
         print_error('Error occurred when dequeueing an empty queue.')
         super().__init__(*args)
 
+# This is the mother of all exceptions in the nodes file
 class NodesExceptions(HuffmanExceptions):
     def __init__(self, *args: object) -> None:
         print_error('The Function was part of the nodes.py file.')
         super().__init__(*args)
 
+# The following exceptions occur in the nodes file
 class NextNodeExpectedStringOrJunctionNodeOrNoneException(NodesExceptions):
     def __init__(self, *args: object) -> None:
         print_error('Error occurred when trying to set the next node to the current node.')
@@ -286,4 +300,31 @@ class NodeChildrenExpectedTupleException(NodesExceptions):
 class NodeChildrenStructureException(NodesExceptions):
     def __init__(self, *args: object) -> None:
         print_error('Error occurred when trying to set the children of a node.')
+        super().__init__(*args)
+
+# This is the mother of all exceptions in the main file
+class MainExceptions(HuffmanExceptions):
+    def __init__(self, *args: object) -> None:
+        print_error('The function was part of the main.py file.')
+        super().__init__(*args)
+
+# The following exceptions occur in the main file
+class GetIntExpectedStringException(MainExceptions):
+    def __init__(self, *args: object) -> None:
+        print_error('Error occurred when calling the get_int() function.')
+        super().__init__(*args)
+
+class GetIntExpectedFunctionException(MainExceptions):
+    def __init__(self, *args: object) -> None:
+        print_error('Error occurred when calling the get_int() function.')
+        super().__init__(*args)
+
+class GetFilePathExpectedStringException(MainExceptions):
+    def __init__(self, *args: object) -> None:
+        print_error('Error occurred when calling the get_file_path() function.')
+        super().__init__(*args)
+
+class GetFilePathExpectedFunctionException(MainExceptions):
+    def __init__(self, *args: object) -> None:
+        print_error('Error occurred when calling the get_file_path() function.')
         super().__init__(*args)

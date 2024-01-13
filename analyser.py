@@ -33,7 +33,7 @@ Provided Value {s = } is not a string literal
         # and set it to 1
         except KeyError:
             letters_dict[i] = 1
-    
+    del s
     # return the dictionary
     return letters_dict
 
@@ -111,11 +111,12 @@ Provided Value {separators=} is not a string literal
                 # set is_separator to False
                 is_separator = False
     
+    del is_separator
     # if there is something still left in the substring (which there will be)
     # append it to the substrings list
     if substring:
         substrings.append(substring)
-    
+    del substring
     # return the substrings list
     return substrings
 
@@ -147,7 +148,7 @@ Provided Value {s = } is not a string literal
             words_dict[word] += 1
         except KeyError:
             words_dict[word] = 1
-
+    del words
     # creating a temporary dictionary from the words_dict
     # without the words that had the value of 1
     temp_dict = {key: value for key, value in words_dict.items() if not value == 1}
@@ -187,8 +188,6 @@ def str_rep(obj) -> str:
 
     # Returning the str representation
     return str_rep_obj
-
-
 
 # This function will take the dictionary containing words and the dictionary containing letters
 # It will then remove refine the letters dictionary by reducing the redundancies
@@ -249,7 +248,7 @@ Provided Value {letters = } is not a dictionary.
     temp = {key: value for key, value in letters.items() if not value == 0}
     letters = temp
     # deleting the temporary dict to save space
-    del temp
+    del temp, letters_keys
     # returning the letters dict
     return letters
 

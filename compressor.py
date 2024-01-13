@@ -2,7 +2,7 @@ from huffman_tree import generate_code_from_queue
 from analyser import analyse_text, SEPARATORS, str_rep, is_valid_dict, separator_split
 from imports import dumps
 from exception_handler import IncorrectBinaryValueException, BinaryStringExpectedException
-from exception_handler import SeparatorSplitExpectedStringExpection, CompressorExpectedStringException
+from exception_handler import CompressorExpectedStringException
 from exception_handler import MakeCompressedStringExpectedStringException, MakeCompressedStringExpectedDictException
 from exception_handler import MakeCompressedStringDictStructureException, MakeCompressedStringCorruptedCodeException
 
@@ -74,7 +74,7 @@ Provided Value {huffman_codes = } is not a dictionary.
                     for word in ones_and_zeros]
     # concatenating the list to form a new text with all 1s and 0s converted
     text = ''.join(ones_and_zeros)
-
+    del ones_and_zeros
     # Separating words and separators
     # (which include 1 and 0 now because we dont want to convert them more than once)
     words = separator_split(text, SEPARATORS+'01')
@@ -85,6 +85,7 @@ Provided Value {huffman_codes = } is not a dictionary.
             for word in words]
     # concatenating the list to form a new text with all the words in dictionary converted
     text = ''.join(words)
+    del words
     # Repeating the same process for the separate characters but this time only using
     # 1s and 0s as separators as everything other the them are already converted
     characters = separator_split(text, '10')
@@ -100,6 +101,7 @@ Conclusion - Code is corrupted.
 """)
     # concatenating the list to form our final binary text with everything converted
     text = ''.join(characters)
+    del characters
     # Returning the compressed binary text
     return text
 
@@ -144,6 +146,6 @@ Provided Value {text = } is not a string literal.
     # writing the zeros added, the 8 bit unicode compressed characters and the code to the final string
     final_string = f'{added_zeros}' + ''.join(characters) + '\n' + dumps(huffman_codes)
     # Deleting heavy data members to free space
-    del characters, binaries, huffman_codes, decimals, compressed_string, queue
+    del characters, binaries, huffman_codes, decimals, compressed_string, queue, added_zeros
     # returning the final formed string that is ready to write in the final file
     return final_string

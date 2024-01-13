@@ -55,7 +55,7 @@ Provided Value {code = } is not a dictionary.
                     pointer.children[int(value)] = TreeNode()
                 # traverse to the respective child node and set the pointer equal to it
                 pointer = pointer.children[int(value)]
-    
+    del pointer, items, code_validity, str_rep_code, code
     # Return the final tree
     return top
 
@@ -79,7 +79,9 @@ Provided Value {queue = } is empty.
     
     # if the queue only has 1 item, return the item itself
     if len(queue) == 1:
-        return queue[0]
+        top = queue[0]
+        del queue
+        return top
     
     # else, add the first 2 items to be dequeued to create a junction node
     # and enqueue it back to the priority queue
@@ -120,7 +122,7 @@ Provided Value {node = } is not a Junction Node.
         else:
             # Re call the function and add the resultant TreeNode to the new list of children
             children[i] = convert_junction_to_tree(children_in_node[i])
-    
+    del node
     # Return a treenode who's children are the new children created
     return StrictTreeNode(tuple(children))
 
@@ -154,7 +156,7 @@ Provided Value {__prev = } is not a string literal.
         # if not, then call the function again and update the dict with the results
         else:
             codes.update(get_huffman_codes(child, __prev=f'{__prev}{i}'))
-    
+    del node
     # Return the new formed dictionary
     return codes
 
@@ -182,6 +184,6 @@ Provided Value {queue = } is an empty queue.
     # convert the huffman tree to the huffman codes dictionary
     huffman_codes = get_huffman_codes(huffman_tree)
     # delete the variables that are node needed as they are heavy memory variables
-    del huffman_tree, junction_tree
+    del huffman_tree, junction_tree, queue
     # return the generated codes
     return huffman_codes
