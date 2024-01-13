@@ -1,6 +1,6 @@
 from queues import Priority_Queue
 from nodes import StringNode
-from exception_handler import CountLettersExpectedStringException, SplitExpectedStringExpection
+from exception_handler import CountLettersExpectedStringException, SeparatorSplitExpectedStringExpection
 from exception_handler import AnalyseWordsExpectedStringException, AnalyseTextExpectedStringException
 from exception_handler import MakeQueueDictionaryStructureException, MakeQueueExpectedDictException
 from exception_handler import RefineLettersDictionaryStructureException, RefineLettersExpectedDictException
@@ -37,54 +37,86 @@ Provided Value {s = } is not a string literal
     # return the dictionary
     return letters_dict
 
-# This function splits a string with all delimiters provided
-# a levelled down version of this exists built-in however, 
-# as far as I could tell, you can't provide multiple delimiters to it so we made it for ourselves
+# This function will split a string on given separators but also keep the separators in the list
+# So we can separate a string based on separators and then be able to rejoin them to get the original string
 # Return type -> list [ str ]
-def split(s: str, delimiters: str = ' ') -> list[str]:
+def separator_split(s: str, separators: str = ' ') -> list[str]:
     
     # If the passed string is not a string raise proper error
     if not isinstance(s, str):
-        raise SplitExpectedStringExpection(f"""
-Function Call : split({s = }, {delimiters = })
+        raise SeparatorSplitExpectedStringExpection(f"""
+Function Call : separator_split({s = }, {separators = })
 Provided Value {s = } is not a string literal
 """)
     
-    # If the delimiters passed is not a string raise proper error
-    if not isinstance(delimiters, str):
-        raise SplitExpectedStringExpection(f"""
-Function Call : split({s = }, {delimiters = })
-Provided Value {delimiters = } is not a string literal
+    # If the separators passed is not a string raise proper error
+    if not isinstance(separators, str):
+        raise SeparatorSplitExpectedStringExpection(f"""
+Function Call : separator_split({s=}, {separators=})
+Provided Value {separators=} is not a string literal
 """)
 
-    # If delimiters is empty, return a list with each character in the string separated
-    if not delimiters:
+    # If the separators string is empty return a list of each separate character in the string
+    if not separators:
         return [i for i in s]
-    
-    # the list of substrings to return
+
+    # The list of substrings that need to be returned
     substrings = []
-
-    # the temporary string that will help in storing each word
+    
+    # The variable to keep track of what letters we have stored as a substring
     substring = ''
-
-    # looping on the string
+    
+    # The variable to keep track is the substring in question currently
+    # is a separator substring or normal one
+    is_separator = False
+    if s[0] in separators:
+        is_separator = True
+    
+    # Looping on the string
     for i in s:
-        # if the character is in delemiters string
-        if i in delimiters:
-            # if len(substring) > 0
-            if substring:
-                # add substring to the list
+        
+        # if the current substring is a normal one
+        if not is_separator:
+            
+            # if the current character is a normal one
+            if i not in separators:
+                # add the character to the substring
+                substring += i
+            
+            # if the current character is a separator
+            else:
+                # append the substring to the substrings list
                 substrings.append(substring)
-                substring = '' # reset the value of the substring
-        # else add the character to the substring
+                # set the substring to the current character
+                # which is a separator
+                substring = i
+                # set is_separator to True
+                is_separator = True
+        
+        # if the current substring was a separator one
         else:
-            substring += i
-    # if the substring is not empty after ending the loop
-    # add the whole substring to the list of substrings
+            
+            # if the current character is a separator
+            if i in separators:
+                # add the character to the substring
+                substring += i
+            
+            # if the current character is a normal one
+            else:
+                # append the substring to the substrings list
+                substrings.append(substring)
+                # set the substring to the current character
+                # which is a normal one
+                substring = i
+                # set is_separator to False
+                is_separator = False
+    
+    # if there is something still left in the substring (which there will be)
+    # append it to the substrings list
     if substring:
         substrings.append(substring)
-
-    # return the list of substrings formed
+    
+    # return the substrings list
     return substrings
 
 # This function counts occurrences of words in the string provided and returns a dictionary
@@ -103,7 +135,7 @@ Provided Value {s = } is not a string literal
     words_dict = dict()
     
     # first we will split the string using the split method we made, using the delimiters already created
-    words = split(s, SEPARATORS)
+    words = separator_split(s, SEPARATORS)
     # count the number of each word and update the dictionary accordingly just like we did with letters
     for word in words:
         # except this time, we skip over the words that have '0' or '1' in them
@@ -155,6 +187,8 @@ def str_rep(obj) -> str:
 
     # Returning the str representation
     return str_rep_obj
+
+
 
 # This function will take the dictionary containing words and the dictionary containing letters
 # It will then remove refine the letters dictionary by reducing the redundancies

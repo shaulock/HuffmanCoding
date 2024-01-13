@@ -1,4 +1,10 @@
 from __future__ import annotations
+from exception_handler import NextNodeExpectedStringOrJunctionNodeOrNoneException, PreviousNodeExpectedQueueNodeOrNoneException
+from exception_handler import RootNodePreviousExpectedNoneException, AttemptedRootNodeAdditionException
+from exception_handler import OperandExpectedStringOrJunctionNode, NodeValueEmptyException
+from exception_handler import NodeValueExpectedStringException
+from exception_handler import NodeStrengthExpectedIntException, NodeStrengthExpectedGreaterThan1Exception
+from exception_handler import NodeChildrenExpectedTupleException, NodeChildrenStructureException
 
 # This is the parent class to all nodes
 class Node:
@@ -28,47 +34,52 @@ class QueueNode(Node):
     
     # The next property to access the next node connected to this node
     @property
-    def next(self) -> StringNode | JunctionNode | type(None):
+    def next(self) -> StringNode | JunctionNode | None:
         return self.__next
     
     # The setter for the next property so we can modify it later
     @next.setter
-    def next(self, next: StringNode | JunctionNode | type(None)) -> None:
-
-        # if the node is not an instance of the queue node class
-        # raise proper error
-        if not isinstance(self, QueueNode):
-            raise ValueError # Change this
+    def next(self, new_next: StringNode | JunctionNode | None) -> None:
         
         # if the next node to be set is not None, StringNode or JunctionNode
         # raise proper error
-        if not isinstance(next, (StringNode, JunctionNode, type(None))):
-            raise ValueError # Change this
+        if not isinstance(new_next, (StringNode, JunctionNode)) and new_next is not None:
+            raise NextNodeExpectedStringOrJunctionNodeOrNoneException(f"""
+Function Call : {self}.next = {new_next}
+Provided value {new_next} should be a string node or a junction node or None.
+""")
 
         # if all checks out, set the next node to the next variable
-        self.__next = next
+        self.__next = new_next
     
     # The previous property to access the previous node connected to this node
     @property
-    def prev(self) -> QueueNode | type(None):
+    def prev(self) -> QueueNode | None:
         return self.__prev
     
     # The setter for the previous property so we can modify it later 
     @prev.setter
-    def prev(self, prev: QueueNode | type(None)) -> None:
+    def prev(self, new_prev: QueueNode | None) -> None:
+        
         # If the previous node to be set is not a QueueNode or a subclass of it
         # Or if it's not None, raise appropriate error
-        if not isinstance(prev, (QueueNode, type(None))):
-            raise ValueError # change this
+        if not isinstance(new_prev, QueueNode) and new_prev is not None:
+            raise PreviousNodeExpectedQueueNodeOrNoneException(f"""
+Function Call : {self}.prev = {new_prev}
+Provided value {new_prev} should be a queue node or None.
+""")
 
         # if the node object calling this function is the RootNode
         # And we are assigning it's previous as anything other than None
         # Raise approriate error
-        if self.type == RootNode and not prev == None:
-            raise ValueError # change this too
+        if self.type == RootNode and new_prev is not None:
+            raise RootNodePreviousExpectedNoneException(f"""
+Function Call : {self}.prev = {new_prev}
+Provided value {new_prev} should be None for a RootNode.
+""")
 
         # if all checks out, set previous property to be the previous variable
-        self.__prev = prev
+        self.__prev = new_prev
 
     # This function will implement the '+' operator between two QueueNode objects
     # that are not RootNodes and return a JunctionNode whose children are the nodes provided
@@ -78,11 +89,17 @@ class QueueNode(Node):
         
         # if self or other node is a RootNode, raise proper error
         if isinstance(self, RootNode) or isinstance(other, RootNode):
-            raise ValueError # Change this
+            raise AttemptedRootNodeAdditionException(f"""
+Function Call : {self} + {other}
+One of the operands is a RootNode, and RootNode addition is not allowed.
+""")
 
         # if other not an instance of QueueNode class, raise proper error
         if not isinstance(other, QueueNode):
-            raise ValueError # Change this
+            raise OperandExpectedStringOrJunctionNode(f"""
+Function Call : {self} + {other}
+Provided operand {other} should be a StringNode or JunctionNode. 
+""")
         
         # Create a new junction node whose children are self and other
         # and strength is the total strength of self and other
@@ -95,6 +112,10 @@ class QueueNode(Node):
         
         # returning the new junction node
         return new_junction
+
+    # Making a reverse addition function just to make adding comutative
+    def __radd__(self: StringNode | JunctionNode, other: StringNode | JunctionNode) -> JunctionNode:
+        return self + other
 
 # This class represents root node of the queue
 class RootNode(QueueNode):
@@ -118,30 +139,36 @@ class RootNode(QueueNode):
 class StringNode(QueueNode):
     
     # The Initializer
-    def __init__(self, 
-                 value: str, 
-                 strength: int) -> None:
+    def __init__(self, value: str, strength: int) -> None:
         super().__init__() # Initializing the parent class
 
-        # if the value to be set is not a string, 
-        # raise proper error
+        # if the value to be set is not a string, raise proper error
         if not isinstance(value, str):
-            raise ValueError # Change this
+            raise NodeValueExpectedStringException(f"""
+Function Call : StringNode({value = }, {strength = })
+Provided Value {value = } is not a string.
+""")
         
-        # if the value to be set is empty
-        # raise proper error
+        # if the value to be set is empty, raise proper error
         if not value:
-            raise ValueError
+            raise NodeValueEmptyException(f"""
+Function Call : StringNode({value = }, {strength = })
+Provided Value {value = } is empty.
+""")
 
-        # if the strength to be set is not an integer
-        # raise proper error
+        # if the strength to be set is not an integer, raise proper error
         if not isinstance(strength, int):
-            raise ValueError # Change this
+            raise NodeStrengthExpectedIntException(f"""
+Function Call : StringNode({value = }, {strength = })
+Provided Value {strength = } is not an integer.
+""")
         
-        # if the strength is less than 0
-        # raise proper error
+        # if the strength is less than 0, raise proper error
         if strength < 1:
-            raise ValueError # Change this
+            raise NodeStrengthExpectedGreaterThan1Exception(f"""
+Function Call : StringNode({value = }, {strength = })
+Provided Value {strength = } is less than 1.
+""")
         
         # if everything is correct, initialize the object with the value and strength provided
         self.__value = value
@@ -177,31 +204,42 @@ class JunctionNode(QueueNode):
                  strength: int) -> None:
         super().__init__() # Initializing the parent class
 
-        # if the children are not stored in a tuple
-        # raise proper error
+        # if the children are not stored in a tuple, raise proper error
         if not isinstance(children, tuple):
-            raise ValueError # change this
+            raise NodeChildrenExpectedTupleException(f"""
+Function Call : JunctionNode({children = }, {strength = })
+Provided value {children = } is not a tuple.
+""")
 
-        # If the length of the children is not 2
-        # raise proper error
+        # If the length of the children is not 2, raise proper error
         if not len(children) == 2:
-            raise ValueError # change this
+            raise NodeChildrenStructureException(f"""
+Function Call : JunctionNode({children = }, {strength = })
+Provided value {children = } is not a tuple of length 2.
+""")
         
         # looping in the children
         for i in children:
-            
-            # if the current child is not a StringNode or a JunctionNode,
-            # raise proper error
+            # if the current child is not a StringNode or a JunctionNode, raise proper error
             if not isinstance(i, (StringNode, JunctionNode)):
-                raise ValueError # change this
+                raise NodeChildrenStructureException(f"""
+Function Call : JunctionNode({children = }, {strength = })
+Provided value {children = } has an element {i} which is not a String Node or a Junction Node.
+""")
         
         # if the strength is not integer, raise proper error
         if not isinstance(strength, int):
-            raise ValueError # change this
+            raise NodeStrengthExpectedIntException(f"""
+Function Call : JunctionNode({children = }, {strength = })
+Provided value {strength = } is not an integer.
+""")
         
         # if the strength is less than 1, raise proper error
         if strength < 1:
-            raise ValueError # change this
+            raise NodeStrengthExpectedGreaterThan1Exception(f"""
+Function Call : JunctionNode({children = }, {strength = })
+Provided value {strength = } is less than 1.
+""")
         
         # if everything is perfect set the values to strength and children attributes
         self.__strength = strength
@@ -244,7 +282,7 @@ class TreeNode(Node):
 
     # The property to access the children of the TreeNode
     @property
-    def children(self) -> list[type(None) | LeafNode | TreeNode, type(None) | LeafNode | TreeNode]:
+    def children(self) -> list[None | LeafNode | TreeNode, None | LeafNode | TreeNode]:
         return self.__children
 
     # This function will create a string representation of the object
@@ -267,14 +305,23 @@ class StrictTreeNode(TreeNode):
         super().__init__() # Initializing the parent class
 
         # Similar checking for the children atribute as JunctionNode
-        # However this time we are checking for TreeNode and LeafNode as potential children
+        # However this time we are checking for StrictTreeNode and LeafNode as potential children
         if not isinstance(children, tuple):
-            raise ValueError # change this
+            raise NodeChildrenExpectedTupleException(f"""
+Function Call : StrictTreeNode({children = })
+Provided value {children = } is not a tuple.
+""")
         if not len(children) == 2:
-            raise ValueError # change this
+            raise NodeChildrenStructureException(f"""
+Function Call : StrictTreeNode({children = })
+Provided value {children = } is not a tuple of length 2.
+""")
         for i in children:
             if not isinstance(i, (StrictTreeNode, LeafNode)):
-                raise ValueError # change this
+                raise NodeChildrenStructureException(f"""
+Function Call : StrictTreeNode({children = })
+Provided value {children = } has an element {i} which is not a StrictTreeNode or a LeafNode.
+""")
         
         # If everything is perfect, initialize the object with the children provided
         self.__children = children
@@ -300,11 +347,17 @@ class LeafNode(Node):
 
         # If the value is not a string raise a proper error
         if not isinstance(value, str):
-            raise ValueError # Change this
+            raise NodeValueExpectedStringException(f"""
+Function Call : LeafNode({value = })
+Provided Value {value = } is not a string.
+""")
         
-        # If the value is empty raise a proper error
+        # if the value to be set is empty, raise proper error
         if not value:
-            raise ValueError
+            raise NodeValueEmptyException(f"""
+Function Call : LeafNode({value = })
+Provided Value {value = } is empty.
+""")
         
         # If everything is perfect initialize the object with the given value
         self.__value = value
@@ -323,3 +376,4 @@ class LeafNode(Node):
     # Return type -> str
     def __str__(self) -> str:
         return self.__repr__() + f' ( value : {self.value} )'
+    

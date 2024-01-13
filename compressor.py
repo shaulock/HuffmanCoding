@@ -1,5 +1,5 @@
 from huffman_tree import generate_code_from_queue
-from analyser import analyse_text, SEPARATORS, str_rep, is_valid_dict
+from analyser import analyse_text, SEPARATORS, str_rep, is_valid_dict, separator_split
 from imports import dumps
 from exception_handler import IncorrectBinaryValueException, BinaryStringExpectedException
 from exception_handler import SeparatorSplitExpectedStringExpection, CompressorExpectedStringException
@@ -32,88 +32,6 @@ Provided Value {bin = } is incorrect binary string.
     num_10 = sum([int(bin[-i])*2**(i-1) for i in range(1, len(bin) + 1)])
     # return the new number formed
     return num_10
-
-# This function will split a string on given separators but also keep the separators in the list
-# So we can separate a string based on separators and then be able to rejoin them to get the original string
-# Return type -> list [ str ]
-def separator_split(s: str, separators: str = ' ') -> list[str]:
-    
-    # If the passed string is not a string raise proper error
-    if not isinstance(s, str):
-        raise SeparatorSplitExpectedStringExpection(f"""
-Function Call : separator_split({s = }, {separators = })
-Provided Value {s = } is not a string literal
-""")
-    
-    # If the separators passed is not a string raise proper error
-    if not isinstance(separators, str):
-        raise SeparatorSplitExpectedStringExpection(f"""
-Function Call : separator_split({s=}, {separators=})
-Provided Value {separators=} is not a string literal
-""")
-
-    # If the separators string is empty return a list of each separate character in the string
-    if not separators:
-        return [i for i in s]
-
-    # The list of substrings that need to be returned
-    substrings = []
-    
-    # The variable to keep track of what letters we have stored as a substring
-    substring = ''
-    
-    # The variable to keep track is the substring in question currently
-    # is a separator substring or normal one
-    is_separator = False
-    if s[0] in separators:
-        is_separator = True
-    
-    # Looping on the string
-    for i in s:
-        
-        # if the current substring is a normal one
-        if not is_separator:
-            
-            # if the current character is a normal one
-            if i not in separators:
-                # add the character to the substring
-                substring += i
-            
-            # if the current character is a separator
-            else:
-                # append the substring to the substrings list
-                substrings.append(substring)
-                # set the substring to the current character
-                # which is a separator
-                substring = i
-                # set is_separator to True
-                is_separator = True
-        
-        # if the current substring was a separator one
-        else:
-            
-            # if the current character is a separator
-            if i in separators:
-                # add the character to the substring
-                substring += i
-            
-            # if the current character is a normal one
-            else:
-                # append the substring to the substrings list
-                substrings.append(substring)
-                # set the substring to the current character
-                # which is a normal one
-                substring = i
-                # set is_separator to False
-                is_separator = False
-    
-    # if there is something still left in the substring (which there will be)
-    # append it to the substrings list
-    if substring:
-        substrings.append(substring)
-    
-    # return the substrings list
-    return substrings
 
 # This function will create the binary string for a given text based on the huffman code given
 # Return type -> str

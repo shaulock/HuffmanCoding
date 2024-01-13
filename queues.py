@@ -1,4 +1,7 @@
 from nodes import RootNode, StringNode, JunctionNode
+from exception_handler import NonIntegerQueueSizeException, NegativeQueueSizeException
+from exception_handler import QueueIndexOutOfRangeException, QueueIndexExpectedIntException
+from exception_handler import QueueItemExpectedStringJunctionNodeException, EmptyQueueException
 
 # This class represents a queue, which is the parent class to a priority queue
 class Queue:
@@ -6,9 +9,9 @@ class Queue:
     # The initializer
     def __init__(self) -> None:
         # Set the initial size of the queue, which is 0 (without counting root)
-        self.size = 0
+        self.size: int = 0
         # Set the head of the queue as a rootnode
-        self.__head = RootNode()
+        self.__head: RootNode = RootNode()
     
     # The property to access the size of the queue
     @property
@@ -21,11 +24,17 @@ class Queue:
 
         # If the new size is not integer raise proper error
         if not isinstance(size, int):
-            raise ValueError # Change this
+            raise NonIntegerQueueSizeException(f"""
+Function Call : {self}.size = {size}.
+Provided Value {size} is not an integer.
+""") # Change this
         
         # If the new size is less than 0 raise proper error
         if size < 0:
-            raise ValueError # Change this
+            raise NegativeQueueSizeException(f"""
+Function Call : {self}.size = {size}.
+Provided Value {size} should not be negative as a queue with negative size does not make sense.
+""") # Change this
         
         # If all is correct set the size to new size
         self.__size = size
@@ -43,7 +52,7 @@ class Queue:
 
     # This generator will allow users to loop on the queue like a normal Iterable
     # Return type -> StringNode or JunctionNone or NoneType
-    def __iter__(self) -> StringNode | JunctionNode | type(None):
+    def __iter__(self) -> StringNode | JunctionNode | None:
         
         # If the length the queue is 0, return
         if len(self) == 0:
@@ -62,10 +71,20 @@ class Queue:
     # Return type -> StringNode or JunctionNode
     def __getitem__(self, key: int) -> StringNode | JunctionNode:
         
+        # if the key provided is not an integer, raise proper exception
+        if not isinstance(key, int):
+            raise QueueIndexExpectedIntException(f"""
+Function Call : {self}[{key}]
+Provided Value {key = } is not an integer.
+""")
+
         # We dont allow negative indexing for the queue to reduce confusion
         # So when the index is out of bounds we raise proper error
         if key < 0 or key >= self.size:
-            raise ValueError # Change this
+            raise QueueIndexOutOfRangeException(f"""
+Function Call : {self}[{key}]
+Provided Value {key = } is not within the range of available values.
+""")
         
         # if the key was valid, we loop over the queue
         # (this is where __iter__() comes in handy)
@@ -80,7 +99,10 @@ class Queue:
         
         # If the value is not StringNode or JunctioNode, raise proper error
         if not isinstance(value, (StringNode, JunctionNode)):
-            raise ValueError # Change this
+            raise QueueItemExpectedStringJunctionNodeException(f"""
+Function Call : {self}[{key}] = {value}
+Provided value {value} should be a String Node or a Junction Node.
+""")
 
         # if the value was valid, change the value at key given
         self[key] = value
@@ -93,7 +115,7 @@ class Queue:
         item = self[key]
 
         # if the item was the last element in the queue
-        if item.next == None:
+        if item.next is None:
             # set the penultimate element's next to None
             item.prev.next = None
         # If the item wasn't the last element
@@ -115,7 +137,10 @@ class Queue:
         
         # if the item is not a StringNode or JunctionNode, raise proper error
         if not isinstance(item, (StringNode, JunctionNode)):
-            raise ValueError # Change this
+            raise QueueItemExpectedStringJunctionNodeException(f"""
+Function Call : {self}.enqueue({item = })
+Provided value {item = } should be a String Node or Junction Node.
+""")
         
         # if the queue is empty, set it to be the next element to the head
         if self.size == 0:
@@ -135,7 +160,10 @@ class Queue:
         
         # If the queue is empty raise proper error
         if self.size == 0:
-            raise ValueError
+            raise EmptyQueueException(f"""
+Function Call : {self}.dequeue()
+Queue object {self} is empty, dequeue not possible.
+""")
         
         # else get the first element of the queue and delete its record from the queue
         # using the [] notation
@@ -174,6 +202,14 @@ class Priority_Queue(Queue):
     # Overriding the enqueue function in the super class to arrange the data priority wise
     # Return type -> None
     def enqueue(self, item: StringNode | JunctionNode) -> None:
+        
+        # If item is not a string node or junction node, raise proper error
+        if not isinstance(item, (StringNode, JunctionNode)):
+            raise QueueItemExpectedStringJunctionNodeException(f"""
+Function Call : {self}.enqueue({item = })
+Provided value {item = } should be a String Node or Junction Node.
+""")
+
         # if the queue is empty, call the function in the parent class
         if len(self) == 0:
             super().enqueue(item)

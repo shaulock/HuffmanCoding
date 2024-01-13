@@ -1,11 +1,32 @@
 from compressor import create_string_to_write as cstw
 from huffman_tree import generate_tree_from_code
 from nodes import LeafNode, TreeNode
-from imports import loads
-
+from imports import loads, JSONDecodeError
+from exception_handler import DecimalToBinaryExpectedIntException, DecimalToBinaryNegativeIntException
+from exception_handler import TextCorruptedExpection, SeparateHuffmanCodesExpectedStringException
+from exception_handler import RefineTextExpectedIntException, DecompressTextExpectedStringException
+from exception_handler import RefineTextExpectedStringException, DecompressTextDictStructureException
+from exception_handler import DecompressTextExpectedDictException, CreateStringToWriteExpectedStringException
+from analyser import str_rep, is_valid_dict
+from printer import print_normal, print_bye
 # This function will convert a decimal number to binary (only positive numbers)
 # Return type -> str
 def decimal_to_binary(deci: int) -> str:
+
+    # If the number provided is not an integer, raise proper error
+    if not isinstance(deci, int):
+        raise DecimalToBinaryExpectedIntException(f"""
+Function Call : decimal_to_binary({deci = })
+Provided value {deci = } is not an integer.
+""")
+
+    # If the number provided is less than 0, raise proper error
+    if deci < 0:
+        raise DecimalToBinaryNegativeIntException(f"""
+Function Call : decimal_to_binary({deci = })
+Provided value {deci = } is a negative number, while the function only takes positive values.
+""")
+
     # Base case for recursion
     # if the number is 0, return '0'
     if deci == 0:
@@ -33,6 +54,13 @@ def decimal_to_binary_8_bit(deci: int) -> str:
 # Return type -> tuple [ dict [ str : int ] , str ]
 def separate_huffman_codes_and_text(text: str) -> tuple[dict[str: int], str]:
     
+    # If the text provided is not a string literal, raise proper error
+    if not isinstance(text, str):
+        raise SeparateHuffmanCodesExpectedStringException(f"""
+Function Call : separate_huffman_codes_and_text({text = })
+Provided value {text = } is not a string literal.
+""")
+
     # creating an empty string and dictionary
     compressed_text = ''
     huffman_codes = dict()
@@ -42,10 +70,21 @@ def separate_huffman_codes_and_text(text: str) -> tuple[dict[str: int], str]:
         if text[i]=='\n':
             if text[i+1] == '{':
                 # convert the codes back from string to dict
-                huffman_codes = loads(text[i+1:])
+                try:
+                    huffman_codes = loads(text[i+1:])
+                except JSONDecodeError:
+                    raise TextCorruptedExpection("separate_huffman_codes_and_text()", f"""
+Function Call : separate_huffman_codes_and_text({text = })
+Provided value {text = }\n\nHas modified the codes required for decompression attached at the end and hence has been rendered corrupted.
+""")
                 # add the rest of the string as the compressed string
                 compressed_text = text[:i]
                 break
+    else:
+        raise TextCorruptedExpection("separate_huffman_codes_and_text()", f"""
+Function Call : separate_huffman_codes_and_text({text = })
+Provided value {text = }\n\nIs missing codes required for decompression hence has been rendered corrupted.
+""")
 
     # Returning a tuple of the codes and compressed text
     return huffman_codes, compressed_text
@@ -54,12 +93,57 @@ def separate_huffman_codes_and_text(text: str) -> tuple[dict[str: int], str]:
 # convert the text from 8 bit unicode to 8 bit binary
 # Return type -> str
 def refine_text(compressed_text_from_file: str, added_zeros: int) -> str:
+    
+    # If added zeros is not an integer, raise proper error
+    if not isinstance(added_zeros, int):
+        raise RefineTextExpectedIntException(f"""
+Function Call : refine_text(
+{compressed_text_from_file = },\n{added_zeros = })
+Provided Value {added_zeros = } is not an integer.
+""")
+    
+    # If added zeros is out of expected range, raise proper error
+    if added_zeros < 0 or added_zeros > 7:
+        raise TextCorruptedExpection("refine_text()", f"""
+Function Call : refine_text(
+{compressed_text_from_file = },\n{added_zeros = })
+Provided Value {added_zeros = } is not in the range (0, 7) hence the file has been rendered corrupt.
+""")
+    
+    # If compressed text from file is not a string, raise proper error
+    if not isinstance(compressed_text_from_file, str):
+        raise RefineTextExpectedStringException(f"""
+Function Call : refine_text(
+{compressed_text_from_file = },\n{added_zeros = })
+Provided Value {compressed_text_from_file = } is not a string literal.
+""")
+
     # creating an empty string
     refined_text = ''
     # looping over the text
     for i in compressed_text_from_file:
         # convert the unicode character to decimal and the decimal to binary string
         refined_text += decimal_to_binary_8_bit(ord(i))
+    
+    # If the number of 0s to remove is more than the length of the string to remove them from,
+    # raise proper error
+    if len(refined_text) <= added_zeros:
+        raise TextCorruptedExpection("refine_text()", f"""
+Function Call : refine_text({compressed_text_from_file = }, {added_zeros = })
+Provided text after converting to binary {refined_text} has less digits than the number of 0s to be removed. 
+Rendering it corrupted.
+""")
+    
+    # If the substring has non 0 values where 0s should have been, raise proper error
+    for i in refined_text[:added_zeros]:
+        if i == '1':
+            raise TextCorruptedExpection("refine_text()", f"""
+Function Call : refine_text(
+{compressed_text_from_file = },\n{added_zeros = })
+Provided text after converting to binary\n{refined_text}\nhas non-zeros in the part where zeros should have been placed.
+Rendering it corrupted.
+""")
+        
     # Removing the added zeros
     refined_text = refined_text[added_zeros:]
     # Returning our refined string
@@ -67,7 +151,30 @@ def refine_text(compressed_text_from_file: str, added_zeros: int) -> str:
 
 # This function will decompress the refined text based on the codes provided
 # Return type -> str
-def decompress_text(text: str, code: dict) -> str:
+def decompress_text(text: str, code: dict[str : str]) -> str:
+    
+    str_rep_code = str_rep(code)
+    # If the text provided is not a string, raise proper error
+    if not isinstance(text, str):
+        raise DecompressTextExpectedStringException(f"""
+Function Call : decompress_text({text = }, code = {str_rep_code})
+Provided Value {code = } is not a dictionary.
+""")
+    
+    code_validity = is_valid_dict(code, key_type=str, value_type=str)
+    # If the dictionary is not valid, raise proper exception
+    if not code_validity[0]:
+        if len(code_validity) == 2:
+            key, value = code_validity[1]
+            raise DecompressTextDictStructureException(f"""
+Function Call : decompress_text({text = }, codes = {str_rep_code})
+The Pair {key = }, {value = } in code does not match the requirements (key: str, value: str).
+""")
+        raise DecompressTextExpectedDictException(f"""
+Function Call : decompress_text({text = }, {code = })
+Provided Value {code = } is not a dictionary.
+""")
+    
     # Setting the type of the codes to be used (so it will be easy to call functions on it)
     huffman_tree: TreeNode
     # Getting the huffman Tree from the codes given
@@ -89,6 +196,13 @@ def decompress_text(text: str, code: dict) -> str:
             # traverse to the intended child of the pointer
             pointer = pointer.children[int(i)]
     
+    # If the last character didn't lead to the final leaf node, raise proper error
+    if pointer is not huffman_tree:
+        raise TextCorruptedExpection('decompress_text()', f"""
+Function Call : decompress_text({text = }, code = {str_rep(code)})
+Provided value {text = }\n\ncouldn't lead to an end. Hence it is rendered corrupt.
+""")
+    
     # Return the decompressed text
     return decompressed_text
 
@@ -96,10 +210,27 @@ def decompress_text(text: str, code: dict) -> str:
 # and create the final string to be written in the output file
 # Return type -> str
 def create_string_to_write(text: str) -> str:
+    
+    # If the text provided is not a string, raise proper error
+    if not isinstance(text, str):
+        raise CreateStringToWriteExpectedStringException(f"""
+Fuunction Call : create_string_to_write({text = })
+Provided Value {text = } is not a string.
+""")
+    
     # Separating and storing the code and compressed text
     huffman_code, compressed_text = separate_huffman_codes_and_text(text)
     # Retrieving the number of zeros that were added during compression
-    added_zeros = int(compressed_text[0])
+    try:
+        added_zeros = int(compressed_text[0])
+    except:
+        raise TextCorruptedExpection(f"""
+Function Call : create_string_to_write(
+{text = }
+)
+Provided text had non-integer value the 0th index. Hence, number of zeros added is unknown.
+Rendering the text as corrupted.
+""")
     # Removing the character that stored the information about 0s added
     compressed_text = compressed_text[1:]
     # Getting the refined compressed text
@@ -109,29 +240,30 @@ def create_string_to_write(text: str) -> str:
     # Returning the final string
     return final_string
 
-
-from printer import print_welcome
-print_welcome()
-TO_CHECK = ''
-with open('requirements.txt', 'r', encoding='utf8') as f:
-    TO_CHECK = f.read()
-check_string = cstw(TO_CHECK)
-code, text = separate_huffman_codes_and_text(check_string)
-zeros = int(text[0])
-text = text[1:]
-original_size = len(TO_CHECK)
-compressed_size = len(check_string)
-compressed_size_without_code = len(text)
-text = refine_text(text, zeros)
-new_text = decompress_text(text, code)
-print_string = f"""
-LOSSLESS CONVERSION                       = {"Yes" if TO_CHECK == new_text else "No"}
-Original size                             = {original_size}\tBytes
-Compression size (without the dictionary) = {compressed_size_without_code}\tBytes
-Compression size (with the dictionary)    = {compressed_size}\tBytes
-Compression rate (without the dictionary) = {(((original_size - compressed_size_without_code)/original_size)*100):.3f} %
-Compression rate (with the dictionary)    = {(((original_size - compressed_size)/original_size)*100):.3f} %
-Bytes saved                               = {(original_size - compressed_size)}\tBytes
-"""
-print(print_string)
+if __name__ == '__main__':
+    from printer import print_welcome
+    print_welcome()
+    TO_CHECK = ''
+    with open('decompressor.py', 'r', encoding='utf8') as f:
+        TO_CHECK = f.read()
+    check_string = cstw(TO_CHECK)
+    code, text = separate_huffman_codes_and_text(check_string)
+    zeros = int(text[0])
+    text = text[1:]
+    original_size = len(TO_CHECK)
+    compressed_size = len(check_string)
+    compressed_size_without_code = len(text)
+    text = refine_text(text, zeros)
+    new_text = decompress_text(text, code)
+    print_string = f"""
+    LOSSLESS CONVERSION                       = {"Yes" if TO_CHECK == new_text else "No"}
+    Original size                             = {original_size}\tBytes
+    Compression size (without the dictionary) = {compressed_size_without_code}\tBytes
+    Compression size (with the dictionary)    = {compressed_size}\tBytes
+    Compression rate (without the dictionary) = {(((original_size - compressed_size_without_code)/original_size)*100):.3f} %
+    Compression rate (with the dictionary)    = {(((original_size - compressed_size)/original_size)*100):.3f} %
+    Bytes saved                               = {(original_size - compressed_size)}\tBytes
+    """
+    print_normal(print_string)
+    print_bye()
 # print(new_text)
