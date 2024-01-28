@@ -6,7 +6,7 @@ from time import perf_counter
 bytes_saved = []
 file_size = []
 compressed_file_size = []
-paragraphs = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000]
+paragraphs = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
 compression_times = []
 decompression_times = []
 

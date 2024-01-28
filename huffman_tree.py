@@ -7,6 +7,42 @@ from exception_handler import ConvertJunctionToTreeExpectedJunctionNodeException
 from exception_handler import GetHuffmanCodesExpectedStringException, GetHuffmanCodesExpectedTreeNodeException
 from exception_handler import GenerateCodeFromQueueEmptyQueueException, GenerateCodeFromQueueExpectedQueueException
 
+# This function converts a priority queue to a Junction Tree using the huffman algorithm
+# Return type -> JunctionNode
+def make_junction_tree(queue: Priority_Queue) -> JunctionNode:
+    
+    # if queue is not a priority queue, raise proper error
+    if not isinstance(queue, Priority_Queue):
+        raise MakeJunctionTreeExpectedQueueException(f"""
+Function Call : make_junction_tree({queue = })
+Provided Value {queue = } is not a priority queue.
+""")
+
+    # if the queue is empty, raise proper error
+    if len(queue) == 0:
+        raise MakeJunctionTreeEmptyQueueException(f"""
+Function Call : make_junction_tree({queue = })
+Provided Value {queue = } is empty.
+""")
+    
+    # if the queue only has 1 item, return the item itself
+    if len(queue) == 1:
+        top = queue[0]
+        del queue
+        return top
+    
+    # else, add the first 2 items to be dequeued to create a junction node
+    # and enqueue it back to the priority queue
+    value_1 = queue.dequeue()
+    value_2 = queue.dequeue()
+    queue.enqueue(value_1 + value_2)
+    
+    # delete the values to save space
+    del value_1, value_2
+    
+    # call the function again passing in the new queue as the argument
+    return make_junction_tree(queue=queue)
+
 # This function will convert the huffman codes dictionary to a huffman tree
 # Return type -> reverseTreeNode
 def generate_tree_from_code(code: dict [str : str]) -> TreeNode:
@@ -59,41 +95,7 @@ Provided Value {code = } is not a dictionary.
     # Return the final tree
     return top
 
-# This function converts a priority queue to a Junction Tree using the huffman algorithm
-# Return type -> JunctionNode
-def make_junction_tree(queue: Priority_Queue) -> JunctionNode:
-    
-    # if queue is not a priority queue, raise proper error
-    if not isinstance(queue, Priority_Queue):
-        raise MakeJunctionTreeExpectedQueueException(f"""
-Function Call : make_junction_tree({queue = })
-Provided Value {queue = } is not a priority queue.
-""")
 
-    # if the queue is empty, raise proper error
-    if len(queue) == 0:
-        raise MakeJunctionTreeEmptyQueueException(f"""
-Function Call : make_junction_tree({queue = })
-Provided Value {queue = } is empty.
-""")
-    
-    # if the queue only has 1 item, return the item itself
-    if len(queue) == 1:
-        top = queue[0]
-        del queue
-        return top
-    
-    # else, add the first 2 items to be dequeued to create a junction node
-    # and enqueue it back to the priority queue
-    value_1 = queue.dequeue()
-    value_2 = queue.dequeue()
-    queue.enqueue(value_1 + value_2)
-    
-    # delete the values to save space
-    del value_1, value_2
-    
-    # call the function again passing in the new queue as the argument
-    return make_junction_tree(queue=queue)
 
 # This function will convert a JunctionNode tree to a Huffman Tree
 # This is done so we dont waste space by storing the integer value inside each junction node
