@@ -1,4 +1,3 @@
-json
 tabulate
 colorama
 art
